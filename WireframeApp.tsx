@@ -1,3 +1,25 @@
+/**
+ * WireframeApp.tsx - Main Application Component
+ *
+ * This is the primary component for the "What Could You Do?" application.
+ * It manages all app screens, navigation, state, and user interactions.
+ *
+ * Key Features:
+ * - Age-appropriate conversation prompts for 4 age groups (3-5, 6-8, 9-12, 13-15+)
+ * - Favorites system for saving preferred prompts
+ * - Settings and customization (dark mode, notifications, TTS)
+ * - First-time user onboarding flow
+ * - Persistent state using AsyncStorage
+ *
+ * Architecture:
+ * - Single-component architecture with multiple screen views
+ * - State-driven navigation between screens
+ * - React hooks for state management and side effects
+ * - StyleSheet-based styling with responsive design
+ *
+ * @module WireframeApp
+ */
+
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -13,20 +35,56 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Feather } from '@expo/vector-icons';
 import * as Font from 'expo-font';
 
+// Get device width for responsive design calculations
 const { width } = Dimensions.get('window');
 
+/**
+ * Main application component containing all screens and logic
+ *
+ * @returns {JSX.Element | null} The current screen or null if fonts are loading
+ */
 const WireframeApp = () => {
+  // ==================== STATE MANAGEMENT ====================
+
+  /**
+   * Current active screen
+   * Possible values: null, 'welcome', 'howToUse', 'home', 'prompt', 'favorites',
+   * 'community', 'settings', 'developer', 'loading'
+   */
   const [screen, setScreen] = useState<string | null>(null);
+
+  /** Whether custom fonts have been loaded */
   const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  /** Currently selected age group (e.g., '3-5', '6-8', '9-12', '13-15') */
   const [selectedAge, setSelectedAge] = useState<string | null>(null);
+
+  /** Index of the current prompt being displayed within the selected age group */
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
+
+  /** Array of favorited prompt IDs in format 'ageGroup-promptIndex' (e.g., '3-5-0') */
   const [favorites, setFavorites] = useState<string[]>([]);
+
+  /** Content filtering mode: 'vetted', 'community', or 'all' */
   const [contentFilter, setContentFilter] = useState('vetted');
+
+  /** Whether push notifications are enabled */
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+
+  /** Whether text-to-speech is enabled */
   const [ttsEnabled, setTtsEnabled] = useState(true);
+
+  /** Whether dark mode is enabled */
   const [darkModeEnabled, setDarkModeEnabled] = useState(false);
 
-  // Load custom fonts
+  // ==================== INITIALIZATION EFFECTS ====================
+
+  /**
+   * Load custom fonts on component mount
+   *
+   * Loads the Barrio font used for the app's main title and branding.
+   * If font loading fails, the app continues with fallback fonts.
+   */
   useEffect(() => {
     async function loadFonts() {
       try {
@@ -43,7 +101,15 @@ const WireframeApp = () => {
     loadFonts();
   }, []);
 
-  // Check if this is the first launch
+  /**
+   * Check if this is the user's first time launching the app
+   *
+   * Determines initial screen based on whether the app has been launched before:
+   * - First launch: Show welcome/onboarding screen
+   * - Returning user: Go directly to home screen
+   *
+   * Uses AsyncStorage to persist the launch status.
+   */
   useEffect(() => {
     const checkFirstLaunch = async () => {
       try {
@@ -66,6 +132,16 @@ const WireframeApp = () => {
     checkFirstLaunch();
   }, []);
 
+  // ==================== DATA CONFIGURATION ====================
+
+  /**
+   * Age group definitions with visual styling
+   *
+   * Each age group has:
+   * - id: Unique identifier and key for prompts object
+   * - label: Display name shown to users
+   * - bgColor: Background color for the age group button
+   */
   const ageGroups = [
     { id: '3-5', label: '3-5 years', bgColor: '#90dcff' },
     { id: '6-8', label: '6-8 years', bgColor: '#00db96' },
@@ -73,6 +149,18 @@ const WireframeApp = () => {
     { id: '13-15', label: '13-15+ years', bgColor: '#fdfb76' }
   ];
 
+  // ==================== SCREEN COMPONENTS ====================
+
+  /**
+   * Loading Screen Component
+   *
+   * Displays the app's branding with an animated question mark.
+   * Used during initialization and as a placeholder screen.
+   *
+   * @param {Object} props - Component props
+   * @param {boolean} [props.showBackButton=false] - Whether to show back button (for developer tools)
+   * @returns {JSX.Element} Loading screen UI
+   */
   const LoadingScreen = ({ showBackButton = false }: { showBackButton?: boolean }) => (
     <View style={styles.loadingContainer}>
       {showBackButton && (
@@ -91,6 +179,14 @@ const WireframeApp = () => {
     </View>
   );
 
+  /**
+   * Conversation prompts organized by age group
+   *
+   * Each age group contains an array of "What if?" scenario prompts designed
+   * to be developmentally appropriate and encourage critical thinking.
+   *
+   * Format: { 'age-range': ['prompt1', 'prompt2', ...] }
+   */
   const prompts: { [key: string]: string[] } = {
     '3-5': [
       "What if you really want a toy that another kid is playing with? What could you do?",
@@ -114,16 +210,28 @@ const WireframeApp = () => {
     ]
   };
 
+  /**
+   * Welcome Screen - First-Time User Onboarding
+   *
+   * Shown on the user's first launch of the app. Introduces the app's purpose
+   * and provides a call-to-action to begin the onboarding flow.
+   *
+   * @returns {JSX.Element} Welcome screen UI
+   */
   const WelcomeScreen = () => (
     <View style={styles.welcomeContainer}>
+      {/* Large question mark icon - app branding */}
       <View style={styles.welcomeQuestionMark}>
         <Text style={styles.welcomeQuestionMarkText}>?</Text>
       </View>
+
       <View style={styles.welcomeContent}>
         <Text style={styles.welcomeTitle}>WHAT COULD YOU DO?</Text>
         <Text style={styles.welcomeSubtitle}>
           Foster meaningful conversations with children through age-appropriate prompts that spark critical thinking and ethical reasoning
         </Text>
+
+        {/* Navigate to the "How to Use" tutorial screen */}
         <TouchableOpacity
           style={styles.getStartedButton}
           onPress={() => setScreen('howToUse')}
@@ -132,12 +240,22 @@ const WireframeApp = () => {
           <Feather name="chevron-right" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
+
       <View style={styles.welcomeFooter}>
         <Text style={styles.welcomeFooterText}>For Parents, Educators & Therapists</Text>
       </View>
     </View>
   );
 
+  /**
+   * How to Use Screen - Onboarding Tutorial
+   *
+   * Provides step-by-step instructions for using the app effectively.
+   * Shows best practices for having meaningful conversations with children.
+   * After completion, marks the app as "launched" and proceeds to home screen.
+   *
+   * @returns {JSX.Element} How to use tutorial screen
+   */
   const HowToUseScreen = () => (
     <SafeAreaView style={styles.screenContainer}>
       <View style={styles.header}>
@@ -225,6 +343,17 @@ const WireframeApp = () => {
     </SafeAreaView>
   );
 
+  /**
+   * Home Screen - Main Navigation Hub
+   *
+   * The primary screen where users select an age group to begin.
+   * Shows:
+   * - Age group selection grid with prompt counts
+   * - Resume option if a previous session exists
+   * - Quick tips for effective conversations
+   *
+   * @returns {JSX.Element} Home screen UI
+   */
   const HomeScreen = () => (
     <SafeAreaView style={styles.screenContainer}>
       <View style={styles.header}>
@@ -297,19 +426,44 @@ const WireframeApp = () => {
     </SafeAreaView>
   );
 
+  /**
+   * Prompt Screen - Display Conversation Scenarios
+   *
+   * Shows the current "What if?" prompt for the selected age group.
+   * Features:
+   * - Current prompt text display
+   * - Favorite/unfavorite toggle
+   * - Text-to-speech audio button
+   * - Navigation to next prompt
+   * - Discussion tips
+   *
+   * @returns {JSX.Element | null} Prompt screen UI or null if no age group selected
+   */
   const PromptScreen = () => {
+    // Guard: Return null if no age group has been selected
     if (!selectedAge) return null;
 
+    // Get current prompt and metadata
     const currentPrompt = prompts[selectedAge][currentPromptIndex];
     const totalPrompts = prompts[selectedAge].length;
     const ageLabel = ageGroups.find(g => g.id === selectedAge)?.label;
+
+    // Create unique ID for this specific prompt (format: 'ageGroup-index')
     const promptId = `${selectedAge}-${currentPromptIndex}`;
     const isFavorited = favorites.includes(promptId);
 
+    /**
+     * Toggle favorite status for the current prompt
+     *
+     * Adds or removes the prompt from the favorites array based on current state.
+     * Favorite IDs are stored in format 'ageGroup-promptIndex' (e.g., '3-5-2')
+     */
     const toggleFavorite = () => {
       if (isFavorited) {
+        // Remove from favorites
         setFavorites(favorites.filter(id => id !== promptId));
       } else {
+        // Add to favorites
         setFavorites([...favorites, promptId]);
       }
     };
@@ -373,6 +527,14 @@ const WireframeApp = () => {
     );
   };
 
+  /**
+   * Community Screen - User-Generated Content (Placeholder)
+   *
+   * Future feature: Allows users to share and discover community-created prompts.
+   * Currently displays a placeholder UI showing the intended functionality.
+   *
+   * @returns {JSX.Element} Community screen UI
+   */
   const CommunityScreen = () => (
     <SafeAreaView style={styles.screenContainer}>
       <View style={styles.header}>
@@ -734,6 +896,16 @@ const WireframeApp = () => {
     </SafeAreaView>
   );
 
+  /**
+   * Settings Screen - App Configuration
+   *
+   * Allows users to customize app behavior and preferences:
+   * - Account settings (profile, password, data management)
+   * - Preferences (dark mode, notifications, TTS, content filter)
+   * - Help & Support options
+   *
+   * @returns {JSX.Element} Settings screen UI
+   */
   const SettingsScreen = () => (
     <SafeAreaView style={styles.screenContainer}>
       <View style={styles.header}>
@@ -957,13 +1129,33 @@ const WireframeApp = () => {
     </View>
   );
 
-  // Show loading screen while checking first launch or loading fonts
+  // ==================== MAIN RENDER LOGIC ====================
+
+  /**
+   * Show loading screen during initialization
+   *
+   * Display loading state while:
+   * 1. Checking if this is the first app launch
+   * 2. Loading custom fonts
+   *
+   * This prevents showing the main UI with missing data or styling
+   */
   if (screen === null || !fontsLoaded) {
     return <LoadingScreen />;
   }
 
+  /**
+   * Main component render
+   *
+   * Renders the appropriate screen based on the current state.
+   * Navigation is controlled by the `screen` state variable.
+   *
+   * Bottom navigation bar is shown on main app screens but hidden
+   * during onboarding (welcome, howToUse) and developer tools.
+   */
   return (
     <View style={styles.container}>
+      {/* Conditional screen rendering based on current navigation state */}
       {screen === 'loading' && <LoadingScreen showBackButton={true} />}
       {screen === 'welcome' && <WelcomeScreen />}
       {screen === 'howToUse' && <HowToUseScreen />}
@@ -973,6 +1165,8 @@ const WireframeApp = () => {
       {screen === 'settings' && <SettingsScreen />}
       {screen === 'developer' && <DeveloperScreen />}
       {screen === 'prompt' && <PromptScreen />}
+
+      {/* Bottom navigation bar - shown on main screens only */}
       {['home', 'community', 'profile', 'settings', 'prompt'].includes(screen) && <BottomNav />}
     </View>
   );
