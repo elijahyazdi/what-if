@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "What Could You Do",
+    "slug": "what-could-you-do",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.whatcouldyoudo.app"
+    },
+    "android": {
+      "package": "com.whatcouldyoudo.app"
+    },
+    "web": {
+      "bundler": "webpack"
+    }
+  }
+}
