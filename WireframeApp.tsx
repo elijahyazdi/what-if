@@ -175,7 +175,10 @@ const WireframeApp = () => {
       <View style={styles.loadingQuestionMark}>
         <Text style={styles.loadingQuestionMarkText}>?</Text>
       </View>
-      <Text style={styles.loadingTitle}>WHAT COULD YOU DO?</Text>
+      {/* Only use custom font once it's loaded to prevent warning */}
+      <Text style={[styles.loadingTitle, fontsLoaded && { fontFamily: 'Barrio-Regular' }]}>
+        WHAT COULD YOU DO?
+      </Text>
     </View>
   );
 
@@ -1218,7 +1221,7 @@ const styles = StyleSheet.create({
   },
   loadingTitle: {
     fontSize: 32,
-    fontFamily: 'Barrio-Regular',
+    // fontFamily is applied conditionally in component to avoid loading warning
     color: '#111827',
     textAlign: 'center',
   },
