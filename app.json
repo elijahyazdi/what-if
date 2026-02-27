@@ -6,14 +6,14 @@
     "orientation": "portrait",
     "userInterfaceStyle": "light",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.whatcouldyoudo.app"
     },
     "android": {
       "package": "com.whatcouldyoudo.app"
     },
     "web": {
-      "bundler": "webpack"
+      "bundler": "metro"
     }
   }
 }
