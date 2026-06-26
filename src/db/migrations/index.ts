@@ -1,0 +1,23 @@
+import * as SQLite from 'expo-sqlite';
+import { migration_0001_init } from './0001_init';
+import { migration_0002_global_tips } from './0002_global_tips';
+import { migration_0003_parent_askable_seed } from './0003_parent_askable_seed';
+import { migration_0004_personalization_tokens } from './0004_personalization_tokens';
+import { migration_0005_seed_modules } from './0005_seed_modules';
+import { migration_0006_madlibs } from './0006_madlibs';
+import { migration_0007_faq_and_resources } from './0007_faq_and_resources';
+
+export type Migration = {
+  name: string;
+  up: (db: SQLite.SQLiteDatabase) => Promise<void>;
+};
+
+export const migrations: Migration[] = [
+  migration_0001_init,
+  migration_0002_global_tips,
+  migration_0003_parent_askable_seed,
+  migration_0004_personalization_tokens,
+  migration_0005_seed_modules,
+  migration_0006_madlibs,
+  migration_0007_faq_and_resources,
+];
