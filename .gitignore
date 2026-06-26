@@ -10,6 +10,9 @@ npm-debug.*
 *.orig.*
 web-build/
 
+# Local Flutter SDK clone (not part of this app)
+flutter/
+
 # macOS
 .DS_Store
 
