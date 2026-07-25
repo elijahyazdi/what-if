@@ -16,5 +16,10 @@ flutter/
 # macOS
 .DS_Store
 
+# Claude skills
+.claude/skills/
+.agents/
+.kiro/
+
 # Temporary files created by Metro to check the health of the file watcher
 .metro-health-check*
